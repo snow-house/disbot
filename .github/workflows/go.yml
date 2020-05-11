@@ -39,4 +39,4 @@ jobs:
     - name: Deploy
       env:
           DISBOTTOKEN: ${{ secrets.DISBOTTOKEN }}
-      run: ./disbot
+      run: ./disbot &
