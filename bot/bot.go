@@ -14,10 +14,13 @@ var (
 	Token string
 	BotID string
 	bot *discordgo.Session
+
 	nimRE *regexp.Regexp
+
 	publicTagRE *regexp.Regexp
 	guildTagRE *regexp.Regexp
 	channelTagRE *regexp.Regexp
+	listTagRE *regexp.Regexp
 
 )
 
@@ -92,10 +95,10 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // get tag handler
 func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if (publicTagRE.match(m.Content)) {
+	if (publicTagRE.MatchString(m.Content)) {
 
 	}
-	_, _ := s.ChannelMessageSendEmbed(m.ChannelID, )
+	// _, _ := s.ChannelMessageSendEmbed(m.ChannelID, )
 }
 
 // add tag handler
@@ -111,10 +114,10 @@ func deleteTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 // list tag handler
 func listTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if (listTagRE.match(m.Content)) {
+	if (listTagRE.MatchString(m.Content)) {
 		result :=  tag.List(m.ChannelID, m.GuildID)
 
-		_, _ := s.ChannelMessageSend(m.ChannelID, result)
+		_, _ = s.ChannelMessageSend(m.ChannelID, result)
 	}
 }
 
