@@ -3,14 +3,23 @@ package bot
 import (
 	"github.com/bwmarrin/discordgo"
 	"fmt"
+	"regexp"
 	"os"
+	"strings"
+	"../nim"
 )
 
 var (
 	Token string
 	BotID string
 	bot *discordgo.Session
+	nimRE *regexp.Regexp
+
 )
+
+func init() {
+	nimRE, _ = regexp.Compile("^/nim .*")
+}
 
 func Start() {
 	Token = os.Getenv("DISBOTTOKEN")
@@ -25,7 +34,8 @@ func Start() {
 
 	// add handlers
 	//basic ping 
-	bot.AddHandler(messageHandler)
+	bot.AddHandler(fuckHandler)
+	bot.AddHandler(nimHandler)
 
 	// open the websocket and begin listening
 	err = bot.Open()
@@ -37,7 +47,7 @@ func Start() {
 	fmt.Println("Bot is running")
 }
 
-func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == BotID {
 		return
 	}
@@ -45,4 +55,22 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "fuck" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "yeah")
 	}
+}
+
+func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	// if message match with nim command
+	if nimRE.MatchString(m.Content) {
+		
+		// extract query
+		query := strings.Replace(nimRE.FindString(m.Content), "/nim ", "", -1)
+		
+		// find nim or name
+		result := nim.Find(query)
+
+		// send reply
+		_, _ = s.ChannelMessageSend(m.ChannelID, result)
+	}
+
+	
 }
