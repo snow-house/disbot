@@ -42,4 +42,4 @@ jobs:
         DBNAME: ${{ secrets.DBNAME }}
         DBUSERNAME: ${{ secrets.DBUSERNAME }}
         DBPWD: ${{ secrets.DBPWD }}
-      run: pm2 restart disbot
+      run: pm2 restart disbot --update-env
