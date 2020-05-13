@@ -30,7 +30,7 @@ var (
 func init() {
 	nimRE, _ = regexp.Compile("^/nim .*")
 
-	publicTagRE, _ = regexp.Compile("#([^#]+)#")
+	publicTagRE, _ = regexp.Compile(`"([^"]+)"`)
 	guildTagRE, _ = regexp.Compile(":([^:])+:")
 	channelTagRE, _ = regexp.Compile(";([^;])+;")
 	addTagRE, _ = regexp.Compile("/addtag .*")
