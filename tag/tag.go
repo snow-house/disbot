@@ -114,7 +114,8 @@ func List(channel, guild string) string {
 		SELECT tag_name, tag_scope FROM %s
 		WHERE
 		tag_channel = ? OR 
-		tag_guild = ?;`,
+		tag_guild = ? OR
+		tag_scope = 2;`,
 		 TABLENAME)
 
 	// execute query
