@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"../nim"
+	"../tag"
 )
 
 var (
@@ -14,11 +15,19 @@ var (
 	BotID string
 	bot *discordgo.Session
 	nimRE *regexp.Regexp
+	publicTagRE *regexp.Regexp
+	guildTagRE *regexp.Regexp
+	channelTagRE *regexp.Regexp
 
 )
 
 func init() {
 	nimRE, _ = regexp.Compile("^/nim .*")
+
+	publicTagRE, _ = regexp.Compile("#([^#]+)#")
+	guildTagRE, _ = regexp.Compile(":([^:])+:")
+	channelTagRE, _ = regexp.Compile(";([^;]);")
+	listTagRE, _ = regexp.Compile("^/taglist")
 }
 
 func Start() {
@@ -26,20 +35,25 @@ func Start() {
 
 	// create new discord session using provided bot token
 	bot, err := discordgo.New("Bot "+Token)
-
 	if err != nil {
 		fmt.Println("Error creating Discord session: ", err)
 		return
 	}
 
 	// add handlers
-	//basic ping 
 	bot.AddHandler(fuckHandler)
+
 	bot.AddHandler(nimHandler)
+
+	bot.AddHandler(getTag)
+	bot.AddHandler(addTag)
+	bot.AddHandler(deleteTag)
+	bot.AddHandler(listTag)
+	bot.AddHandler(infoTag)
+
 
 	// open the websocket and begin listening
 	err = bot.Open()
-
 	if err != nil {
 		fmt.Println("Error opening Discord session: ", err)
 	}
@@ -47,6 +61,7 @@ func Start() {
 	fmt.Println("Bot is running")
 }
 
+// simple pings
 func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == BotID {
 		return
@@ -57,6 +72,7 @@ func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+// nim command handler
 func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// if message match with nim command
@@ -70,7 +86,39 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// send reply
 		_, _ = s.ChannelMessageSend(m.ChannelID, result)
-	}
+	}	
+}
 
+// get tag handler
+func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if (publicTagRE.match(m.Content)) {
+
+	}
+	_, _ := s.ChannelMessageSendEmbed(m.ChannelID, )
+}
+
+// add tag handler
+func addTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+	
+}
+
+// delete tag handler
+func deleteTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+	
+}
+
+// list tag handler
+func listTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if (listTagRE.match(m.Content)) {
+		result :=  tag.List(m.ChannelID, m.GuildID)
+
+		_, _ := s.ChannelMessageSend(m.ChannelID, result)
+	}
+}
+
+// info tag handler
+func infoTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 }
