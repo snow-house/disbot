@@ -114,14 +114,14 @@ func addTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		var status bool
 
-		// handle public scope
+		// handle guild scope
 		if len(args) == 3 {
-			status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 2)
+			status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 1)
 		} else if len(args) == 4 { // handle channel and guild scope
 			if args[3] == "-c" {
 				status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 0)
-			} else if args[3] == "-g" {
-				status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 1)
+			} else if args[3] == "-p" {
+				status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 2)
 			} else {
 				s.ChannelMessageSend(m.ChannelID, "unknown flag, you might need some /help")
 				return
