@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"os"
+	"time"
 	"strings"
 	"../nim"
 	"../tag"
@@ -30,8 +31,8 @@ func init() {
 	nimRE, _ = regexp.Compile("^/nim .*")
 
 	publicTagRE, _ = regexp.Compile("#([^#]+)#")
-	guildTagRE, _ = regexp.Compile(":([^:])+:")
-	channelTagRE, _ = regexp.Compile(";([^;]);")
+	guildTagRE, _ = regexp.Compile("\\|([^$])+\\|")
+	channelTagRE, _ = regexp.Compile(";([^;])+;")
 	addTagRE, _ = regexp.Compile("/addtag .*")
 	listTagRE, _ = regexp.Compile("^/taglist")
 	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
@@ -100,10 +101,64 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // get tag handler
 func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if publicTagRE.MatchString(m.Content) {
+	var name string
+	var scope int
 
+	if m.Author.Bot {
+		return
 	}
-	// _, _ := s.ChannelMessageSendEmbed(m.ChannelID, )
+
+	if publicTagRE.MatchString(m.Content) {
+		name = strings.Replace(publicTagRE.FindString(m.Content), "#", "", -1)
+		scope = 2
+		
+	} else if guildTagRE.MatchString(m.Content) {
+		name = strings.Replace(guildTagRE.FindString(m.Content), "|", "", -1)
+		scope = 1
+		
+	} else if channelTagRE.MatchString(m.Content) {
+		name = strings.Replace(channelTagRE.FindString(m.Content), ";", "", -1)
+		scope = 0
+		
+	} else {
+		return
+	}
+
+	status, url := tag.Get(name, m.ChannelID, m.GuildID, scope)
+
+	if !status {
+		s.ChannelMessageSend(m.ChannelID, "tag "+ name +" doesn't exist")
+		return
+	}
+
+	embed := &discordgo.MessageEmbed{
+	    Author:      &discordgo.MessageEmbedAuthor{},
+	    Color:       0x00ff00, // Green
+	    // Description: "This is a discordgo embed",
+	    // Fields: []*discordgo.MessageEmbedField{
+	    //     &discordgo.MessageEmbedField{
+	    //         Name:   "I am a field",
+	    //         Value:  "I am a value",
+	    //         Inline: true,
+	    //     },
+	    //     &discordgo.MessageEmbedField{
+	    //         Name:   "I am a second field",
+	    //         Value:  "I am a value",
+	    //         Inline: true,
+	    //     },
+	    // },
+	    Image: &discordgo.MessageEmbedImage{
+	        URL: url,
+	    },
+	    // Thumbnail: &discordgo.MessageEmbedThumbnail{
+	    //     URL: url,
+	    // },
+	    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+	    Title:     name,
+	}
+
+	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	return
 }
 
 // add tag handler

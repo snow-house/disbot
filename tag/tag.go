@@ -38,38 +38,40 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 	query := fmt.Sprintf(`
 		SELECT tag_url FROM %s
 		WHERE
-		tag_name = ?
+		tag_name = ? AND
 		`, TABLENAME)
 
-
 	var url string
-	var e error
+	var err error
 
 	if scope == 2 {
 		query = fmt.Sprintf(`
 			%s
 			tag_scope = ?;`, query)
 
-		e = db.QueryRow(query, name, scope).Scan(&url)
+		err = db.QueryRow(query, name, scope).Scan(&url)
+		
 
 	} else if scope == 1 {
 		query = fmt.Sprintf(`
 			%s
-			tag_guild = ?
+			tag_guild = ? AND
 			tag_scope = ?;`, query)
 
-		e = db.QueryRow(query, name, guild, scope).Scan(&url)
+		err = db.QueryRow(query, name, guild, scope).Scan(&url)
+		
 	} else {
 		query = fmt.Sprintf(`
 			%s
-			tag_channel = ?
+			tag_channel = ? AND
 			tag_scope = ?;`, query)
 
-		e = db.QueryRow(query, name, channel, scope).Scan(&url)
+		err = db.QueryRow(query, name, channel, scope).Scan(&url)
+		
 	}
 
-	if e != nil {
-		log.Println(e)
+	if err!= nil {
+		log.Println(err)
 		return false, "nothing found"
 	}
 
