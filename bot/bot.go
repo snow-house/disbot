@@ -31,7 +31,7 @@ func init() {
 	nimRE, _ = regexp.Compile("^/nim .*")
 
 	publicTagRE, _ = regexp.Compile("#([^#]+)#")
-	guildTagRE, _ = regexp.Compile("\\|([^$])+\\|")
+	guildTagRE, _ = regexp.Compile(":([^:])+:")
 	channelTagRE, _ = regexp.Compile(";([^;])+;")
 	addTagRE, _ = regexp.Compile("/addtag .*")
 	listTagRE, _ = regexp.Compile("^/taglist")
@@ -113,7 +113,7 @@ func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 		scope = 2
 		
 	} else if guildTagRE.MatchString(m.Content) {
-		name = strings.Replace(guildTagRE.FindString(m.Content), "|", "", -1)
+		name = strings.Replace(guildTagRE.FindString(m.Content), ":", "", -1)
 		scope = 1
 		
 	} else if channelTagRE.MatchString(m.Content) {
