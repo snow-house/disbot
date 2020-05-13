@@ -21,6 +21,10 @@ func init() {
 	DBUSERNAME = os.Getenv("DBUSERNAME")
 	DBPWD = os.Getenv("DBPWD")
 	TABLENAME = "tags"	
+	fmt.Println(DBNAME)
+	fmt.Println(DBUSERNAME)
+	fmt.Println(DBPWD)
+	fmt.Println(TABLENAME)
 }
 
 type Tag struct {
