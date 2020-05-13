@@ -20,11 +20,7 @@ func init() {
 	DBNAME = os.Getenv("DBNAME")
 	DBUSERNAME = os.Getenv("DBUSERNAME")
 	DBPWD = os.Getenv("DBPWD")
-	TABLENAME = "tags"	
-	fmt.Println(DBNAME)
-	fmt.Println(DBUSERNAME)
-	fmt.Println(DBPWD)
-	fmt.Println(TABLENAME)
+	TABLENAME = "tags"
 }
 
 type Tag struct {
@@ -36,12 +32,7 @@ type Tag struct {
 // return search status dan tag_url
 func Get(name, channel, guild string, scope int) (bool, string) {
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", DBUSERNAME, DBPWD, DBNAME))
-
-	if err != nil {
-		log.Println(err)
-	}
-
+	db := dbConn()
 	defer db.Close()
 
 	query := fmt.Sprintf(`
@@ -88,6 +79,22 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 // add tag
 // return add status
 func Add(name, url, owner, channel, guild string, scope int) bool {
+
+	db := dbConn()
+	defer db.Close()
+
+	query := fmt.Sprintf(`
+		INSERT INTO %s(tag_name, tag_url, tag_owner, tag_channel, tag_guild, tag_scope)
+		VALUES(?, ?, ?, ?, ?, ?);`, TABLENAME)
+
+	insForm, err := db.Prepare(query)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	insForm.Exec(name, url, owner, channel, guild, scope)
+
 	return true
 }
 
@@ -100,12 +107,7 @@ func Delete(name, url, owner, channel, guild string, scope int) bool {
 // get a list of all available tags
 func List(channel, guild string) string {
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", DBUSERNAME, DBPWD, DBNAME))
-
-	if err != nil {
-		log.Println(err)
-	}
-
+	db := dbConn()
 	defer db.Close()
 
 	query := fmt.Sprintf(`
@@ -157,4 +159,14 @@ func List(channel, guild string) string {
 // return search status and string of metadata
 func Info(name, channel, guild string) (bool, string) {
 	return true, "owner: yourmom"
+}
+
+func dbConn() (db *sql.DB) {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", DBUSERNAME, DBPWD, DBNAME))
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	return db
 }

@@ -20,8 +20,10 @@ var (
 	publicTagRE *regexp.Regexp
 	guildTagRE *regexp.Regexp
 	channelTagRE *regexp.Regexp
+	addTagRE *regexp.Regexp
 	listTagRE *regexp.Regexp
-
+	deleteTagRE *regexp.Regexp
+	infoTagRE *regexp.Regexp
 )
 
 func init() {
@@ -30,7 +32,10 @@ func init() {
 	publicTagRE, _ = regexp.Compile("#([^#]+)#")
 	guildTagRE, _ = regexp.Compile(":([^:])+:")
 	channelTagRE, _ = regexp.Compile(";([^;]);")
+	addTagRE, _ = regexp.Compile("/addtag .*")
 	listTagRE, _ = regexp.Compile("^/taglist")
+	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
+	infoTagRE, _ = regexp.Compile("^/taginfo .*")
 }
 
 func Start() {
@@ -95,7 +100,7 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // get tag handler
 func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if (publicTagRE.MatchString(m.Content)) {
+	if publicTagRE.MatchString(m.Content) {
 
 	}
 	// _, _ := s.ChannelMessageSendEmbed(m.ChannelID, )
@@ -104,6 +109,36 @@ func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 // add tag handler
 func addTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
+	if addTagRE.MatchString(m.Content) {
+		args := strings.Split(m.Content, " ")
+
+		var status bool
+
+		// handle public scope
+		if len(args) == 3 {
+			status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 2)
+		} else if len(args) == 4 { // handle channel and guild scope
+			if args[3] == "-c" {
+				status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 0)
+			} else if args[3] == "-g" {
+				status = tag.Add(args[1], args[2], m.Author.ID, m.ChannelID, m.GuildID, 1)
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "unknown flag, you might need some /help")
+				return
+			}
+		} else { // send error message
+			s.ChannelMessageSend(m.ChannelID, "wrong arguments, you might need some /help")
+			return
+		}
+
+		var reply string
+		if status {
+			reply = "tag " + args[1] + " added"
+		} else {
+			reply = "failed to add tag"
+		}
+		s.ChannelMessageSend(m.ChannelID, reply)
+	}
 }
 
 // delete tag handler
@@ -114,7 +149,7 @@ func deleteTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 // list tag handler
 func listTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if (listTagRE.MatchString(m.Content)) {
+	if listTagRE.MatchString(m.Content) {
 		result :=  tag.List(m.ChannelID, m.GuildID)
 
 		_, _ = s.ChannelMessageSend(m.ChannelID, result)
