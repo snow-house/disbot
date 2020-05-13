@@ -9,13 +9,19 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const {
+var (
+	DBNAME string
+	DBUSERNAME string
+	DBPWD string
+	TABLENAME string
+)
+
+func init() {
 	DBNAME = os.Getenv("DBNAME")
 	DBUSERNAME = os.Getenv("DBUSERNAME")
 	DBPWD = os.Getenv("DBPWD")
-	TABLENAME = "tags"
+	TABLENAME = "tags"	
 }
-
 
 type Tag struct {
 	tag_name string
@@ -42,14 +48,14 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 
 
 	var url string
-	var err error
+	var e error
 
 	if scope == 2 {
 		query = fmt.Sprintf(`
 			%s
 			tag_scope = ?;`, query)
 
-		err = qb.QueryRow(query, name, scope).Scan(&url)
+		e = db.QueryRow(query, name, scope).Scan(&url)
 
 	} else if scope == 1 {
 		query = fmt.Sprintf(`
@@ -57,18 +63,18 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 			tag_guild = ?
 			tag_scope = ?;`, query)
 
-		err = qb.QueryRow(query, name, guild, scope).Scan(&url)
+		e = db.QueryRow(query, name, guild, scope).Scan(&url)
 	} else {
 		query = fmt.Sprintf(`
 			%s
 			tag_channel = ?
 			tag_scope = ?;`, query)
 
-		err = qb.QueryRow(query, name, channel, scope).Scan(&url)
+		e = db.QueryRow(query, name, channel, scope).Scan(&url)
 	}
 
-	if err != nil {
-		log.Println(err)
+	if e != nil {
+		log.Println(e)
 		return false, "nothing found"
 	}
 
@@ -88,7 +94,7 @@ func Delete(name, url, owner, channel, guild string, scope int) bool {
 }
 
 // get a list of all available tags
-func List(channel, guild) string {
+func List(channel, guild string) string {
 
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", DBUSERNAME, DBPWD, DBNAME))
 
@@ -102,7 +108,7 @@ func List(channel, guild) string {
 		SELECT tag_name, tag_scope FROM %s
 		WHERE
 		tag_channel = ? OR 
-		tag_guild = ?`;,
+		tag_guild = ?;`,
 		 TABLENAME)
 
 	// execute query
@@ -145,6 +151,6 @@ func List(channel, guild) string {
 
 // get metadata of a tag using name
 // return search status and string of metadata
-func Info(name, channel, guild) (bool, string) {
+func Info(name, channel, guild string) (bool, string) {
 	return true, "owner: yourmom"
 }
