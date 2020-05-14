@@ -42,4 +42,11 @@ jobs:
         DBNAME: ${{ secrets.DBNAME }}
         DBUSERNAME: ${{ secrets.DBUSERNAME }}
         DBPWD: ${{ secrets.DBPWD }}
+        REDDITUSERNAME: ${{ secrets.REDDITUSERNAME }}
+        REDDITPWD: ${{ secrets.REDDITPWD }}
+        REDDITCLIENTID: ${{ secrets.REDDITCLIENTID }}
+        REDDITCLIENTSECRET: ${{ secrets.REDDITCLIENTSECRET }}
+        REDDITREFRESHTOKEN: ${{ secrets.REDDITREFRESHTOKEN }}
+        REDDITACCESSTOKEN: ${{ secrets.REDDITACCESSTOKEN }}
+        
       run: pm2 restart disbot --update-env
