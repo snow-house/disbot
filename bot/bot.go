@@ -2,13 +2,17 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+
 	"fmt"
 	"regexp"
 	"os"
 	"time"
 	"strings"
+	"strconv"
+
 	"../nim"
 	"../tag"
+	"../reddit"
 )
 
 var (
@@ -25,6 +29,10 @@ var (
 	listTagRE *regexp.Regexp
 	deleteTagRE *regexp.Regexp
 	infoTagRE *regexp.Regexp
+
+	subredditRE *regexp.Regexp
+	askredditRE *regexp.Regexp
+	randomRE *regexp.Regexp
 )
 
 func init() {
@@ -37,6 +45,10 @@ func init() {
 	listTagRE, _ = regexp.Compile("^/taglist")
 	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
 	infoTagRE, _ = regexp.Compile("^/taginfo .*")
+
+	subredditRE, _ = regexp.Compile("^/r .*")
+	askredditRE, _ = regexp.Compile("^/ask")
+	randomRE, _ = regexp.Compile("^/random")
 }
 
 func Start() {
@@ -52,13 +64,21 @@ func Start() {
 	// add handlers
 	bot.AddHandler(fuckHandler)
 
+	// nim
 	bot.AddHandler(nimHandler)
 
-	bot.AddHandler(getTag)
-	bot.AddHandler(addTag)
-	bot.AddHandler(deleteTag)
-	bot.AddHandler(listTag)
-	bot.AddHandler(infoTag)
+	// tag
+	bot.AddHandler(getTagHandler)
+	bot.AddHandler(addTagHandler)
+	bot.AddHandler(deleteTagHandler)
+	bot.AddHandler(listTagHandler)
+	bot.AddHandler(infoTagHandler)
+
+	// reddit
+	bot.AddHandler(rHandler)
+	bot.AddHandler(askHandler)
+	bot.AddHandler(randomHandler)
+
 
 
 	// open the websocket and begin listening
@@ -99,7 +119,7 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // get tag handler
-func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	var name string
 	var scope int
@@ -162,7 +182,7 @@ func getTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // add tag handler
-func addTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+func addTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 	if addTagRE.MatchString(m.Content) {
 		args := strings.Split(m.Content, " ")
@@ -197,12 +217,12 @@ func addTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // delete tag handler
-func deleteTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+func deleteTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 }
 
 // list tag handler
-func listTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+func listTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if listTagRE.MatchString(m.Content) {
 		result :=  tag.List(m.ChannelID, m.GuildID)
@@ -212,6 +232,147 @@ func listTag(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // info tag handler
-func infoTag(s *discordgo.Session, m *discordgo.MessageCreate) {
+func infoTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 }
+
+// random meme handler
+func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if m.Author.ID == BotID {
+		return
+	}
+
+	if randomRE.MatchString(m.Content) {
+
+		status, title, url := reddit.Random()
+		if !status {
+			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
+			return
+		}
+
+		embed := &discordgo.MessageEmbed{
+		    Author:      &discordgo.MessageEmbedAuthor{},
+		    Color:       0xFF5700, // reddit orange
+		    // Description: desc,
+		    // Fields: []*discordgo.MessageEmbedField{
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   "I am a field",
+		    //         Value:  "I am a value",
+		    //         Inline: true,
+		    //     },
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   "I am a second field",
+		    //         Value:  "I am a value",
+		    //         Inline: true,t
+		    //     },
+		    // },
+		    Image: &discordgo.MessageEmbedImage{
+		        URL: url,
+		    },
+		    // Thumbnail: &discordgo.MessageEmbedThumbnail{
+		    //     URL: url,
+		    // },
+		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		    Title:     title,
+		}
+
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		return
+
+
+	}
+}
+
+// /r handler
+func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if m.Author.ID == BotID {
+		return 
+	}
+
+
+	if subredditRE.MatchString(m.Content) {
+		args := strings.Split(m.Content, " ")
+		commentNum := 0
+
+		if len(args) > 2 { // extract comment num from command args
+			if temp, err := strconv.Atoi(args[2]); err == nil {
+				commentNum = temp
+			}
+		}
+
+		status, title, url, desc, flair, comments := reddit.R(args[1], commentNum)
+
+		if !status {
+			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
+			return 
+		}
+
+		embed := &discordgo.MessageEmbed{
+		    Author:      &discordgo.MessageEmbedAuthor{},
+		    Color:       0xFF5700, // reddit orange
+		    Description: desc,
+		    // Fields: []*discordgo.MessageEmbedField{
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   "I am a field",
+		    //         Value:  "I am a value",
+		    //         Inline: true,
+		    //     },
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   "I am a second field",
+		    //         Value:  "I am a value",
+		    //         Inline: true,t
+		    //     },
+		    // },
+		    Image: &discordgo.MessageEmbedImage{
+		        URL: url,
+		    },
+		    // Thumbnail: &discordgo.MessageEmbedThumbnail{
+		    //     URL: url,
+		    // },
+		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		    Title:     title,
+		}
+
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+
+		if flair != "flair" {
+			s.ChannelMessageSend(m.ChannelID, flair)
+		}
+
+		if desc != "desc" {
+			s.ChannelMessageSend(m.ChannelID, desc)
+		}
+
+		if comments != "empty" {
+			s.ChannelMessageSend(m.ChannelID, comments)
+		}
+		return
+	}
+}
+
+// /ask handler
+func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if m.Author.ID == BotID {
+		return 
+	}
+
+	if askredditRE.MatchString(m.Content) {
+
+		status, title, desc, comments := reddit.Ask()
+
+		if !status {
+			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
+			return
+		}
+
+		s.ChannelMessageSend(m.ChannelID, title)
+		s.ChannelMessageSend(m.ChannelID, desc)
+		s.ChannelMessageSend(m.ChannelID, comments)
+		return
+	}
+
+}
+
