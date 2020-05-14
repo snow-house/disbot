@@ -46,12 +46,14 @@ func init() {
 	if err != nil {
 		log.Println(err)
 	}
+	log.Println("geddit oauth session opened")
 
 	// login using personal reddit account
 	err = session.LoginAuth(REDDITUSERNAME, REDDITPWD)
 	if err != nil {
 		log.Println(err)
 	}
+	log.Println("geddit login succesful")
 
 	subOpts = geddit.ListingOptions {
 		Limit: 100,
@@ -65,6 +67,7 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 	posts, err := session.SubredditSubmissions(subreddit, geddit.HotSubmissions, subOpts)
 
 	if err != nil {
+		log.Println("failed when trying to fetch post from " + subreddit)
 		log.Println(err)
 		return false, "something wrong", "url", "desc", "flair", "comments"
 	}
@@ -90,6 +93,7 @@ func Ask() (status bool, title, desc, comments string) {
 
 	posts, err := session.SubredditSubmissions("askreddit", geddit.HotSubmissions, subOpts)
 	if err != nil {
+		log.Println("failed when trying to fetch post from askreddit")
 		log.Println(err)
 		return false, "something wrong :(", "desc", "comments"
 	}
@@ -110,6 +114,7 @@ func Random() (status bool, title, url string) {
 
 	posts, err := session.SubredditSubmissions("dankmemes", geddit.HotSubmissions, subOpts)
 	if err != nil {
+		log.Println("failed when trying to fetch post from dankmemes")
 		log.Println(err)
 		return false, "something wrong :(", "url"
 	}
