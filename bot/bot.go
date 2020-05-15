@@ -55,8 +55,8 @@ func init() {
 	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
 	REDDITPWD = os.Getenv("REDDITPWD")
 
-	log.Println(REDDITCLIENTID)
-	log.Println(REDDITCLIENTSECRET)
+	log.Println("REDDITCLIENTID: " + REDDITCLIENTID)
+	log.Println("REDDITCLIENTSECRET: " + REDDITCLIENTSECRET)
 
 
 	// init geddit session 
