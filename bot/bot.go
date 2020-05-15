@@ -59,8 +59,9 @@ func init() {
 	log.Println("REDDITCLIENTSECRET: " + REDDITCLIENTSECRET)
 
 
+	var err error
 	// init geddit session 
-	redditSession, err := geddit.NewOAuthSession(
+	redditSession, err = geddit.NewOAuthSession(
 		REDDITCLIENTID,
 		REDDITCLIENTSECRET,
 		"gedditAgent v2",
