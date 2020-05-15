@@ -4,56 +4,56 @@ import (
 	"github.com/jzelinskie/geddit"
 	// "fmt"
 	"log"
-	"os"
+	// "os"
 	// "strings"
 	"math/rand"
 )
 
 var (
-	session *geddit.OAuthSession
+	// session *geddit.OAuthSession
 	subOpts geddit.ListingOptions
 
-	REDDITCLIENTID string
-	REDDITCLIENTSECRET string
-	REDDITREFRESHTOKEN string
-	REDDITACCESSTOKEN string
+	// REDDITCLIENTID string
+	// REDDITCLIENTSECRET string
+	// REDDITREFRESHTOKEN string
+	// REDDITACCESSTOKEN string
 
-	REDDITUSERNAME string
-	REDDITPWD string
+	// REDDITUSERNAME string
+	// REDDITPWD string
 
 )
 
 func init() {
 
-	// read env
-	REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
-	REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
-	REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
-	REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
+	// // read env
+	// REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
+	// REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
+	// REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
+	// REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
 
-	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
-	REDDITPWD = os.Getenv("REDDITPWD")
+	// REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
+	// REDDITPWD = os.Getenv("REDDITPWD")
 
 
-	// init geddit session 
-	session, err := geddit.NewOAuthSession(
-		REDDITCLIENTID,
-		REDDITCLIENTSECRET,
-		"gedditAgent v2",
-		"redirect url",
-	)
+	// // init geddit session 
+	// session, err := geddit.NewOAuthSession(
+	// 	REDDITCLIENTID,
+	// 	REDDITCLIENTSECRET,
+	// 	"gedditAgent v2",
+	// 	"redirect url",
+	// )
 
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit oauth session opened")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit oauth session opened")
 
-	// login using personal reddit account
-	err = session.LoginAuth(REDDITUSERNAME, REDDITPWD)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit login succesful")
+	// // login using personal reddit account
+	// err = session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit login succesful")
 
 	subOpts = geddit.ListingOptions {
 		Limit: 100,
@@ -62,7 +62,7 @@ func init() {
 }
 
 // fetch a post from a subreddit
-func R(subreddit string, comment int) (status bool, title, url, desc, flair, comments string) {
+func R(session *geddit.OAuthSession, subreddit string, comment int) (status bool, title, url, desc, flair, comments string) {
 	
 	log.Println("fetching post from "+ subreddit)
 	posts, err := session.SubredditSubmissions(subreddit, geddit.HotSubmissions, subOpts)
@@ -91,7 +91,7 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 }
 
 // fetch a post and comments from r/askreddit
-func Ask() (status bool, title, desc, comments string) {
+func Ask(session *geddit.OAuthSession) (status bool, title, desc, comments string) {
 
 	log.Println("fetching post from askreddit")
 	posts, err := session.SubredditSubmissions("askreddit", geddit.HotSubmissions, subOpts)
@@ -116,7 +116,7 @@ func Ask() (status bool, title, desc, comments string) {
 }
 
 // fetch a meme from r/dankmemes
-func Random() (status bool, title, url string) {
+func Random(session *geddit.OAuthSession) (status bool, title, url string) {
 
 	log.Println("fetching post from dankmemes")
 	posts, err := session.SubredditSubmissions("dankmemes", geddit.HotSubmissions, subOpts)

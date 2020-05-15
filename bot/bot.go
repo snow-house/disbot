@@ -2,8 +2,10 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/jzelinskie/geddit"
 
 	"fmt"
+	"log"
 	"regexp"
 	"os"
 	"time"
@@ -20,35 +22,60 @@ var (
 	BotID string
 	bot *discordgo.Session
 
-	nimRE *regexp.Regexp
-
-	publicTagRE *regexp.Regexp
-	guildTagRE *regexp.Regexp
-	channelTagRE *regexp.Regexp
-	addTagRE *regexp.Regexp
-	listTagRE *regexp.Regexp
 	deleteTagRE *regexp.Regexp
 	infoTagRE *regexp.Regexp
 
-	subredditRE *regexp.Regexp
-	askredditRE *regexp.Regexp
-	randomRE *regexp.Regexp
+
+	redditSession *geddit.OAuthSession
+	// subOpts geddit.ListingOptions
+
+	REDDITCLIENTID string
+	REDDITCLIENTSECRET string
+	REDDITREFRESHTOKEN string
+	REDDITACCESSTOKEN string
+
+	REDDITUSERNAME string
+	REDDITPWD string
+
+	
 )
 
 func init() {
-	nimRE, _ = regexp.Compile("^/nim .*")
-
-	publicTagRE, _ = regexp.Compile(`"([^"]+)"`)
-	guildTagRE, _ = regexp.Compile(":([^:])+:")
-	channelTagRE, _ = regexp.Compile(";([^;])+;")
-	addTagRE, _ = regexp.Compile("/addtag .*")
-	listTagRE, _ = regexp.Compile("^/taglist")
+	
+	
 	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
 	infoTagRE, _ = regexp.Compile("^/taginfo .*")
 
-	subredditRE, _ = regexp.Compile("^/r .*")
-	askredditRE, _ = regexp.Compile("^/ask")
-	randomRE, _ = regexp.Compile("^/random")
+	// read env
+	REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
+	REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
+	REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
+	REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
+
+	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
+	REDDITPWD = os.Getenv("REDDITPWD")
+
+
+	// init geddit session 
+	redditSession, err := geddit.NewOAuthSession(
+		REDDITCLIENTID,
+		REDDITCLIENTSECRET,
+		"gedditAgent v2",
+		"redirect url",
+	)
+
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("geddit oauth session opened")
+
+	// login using personal reddit account
+	err = redditSession.LoginAuth(REDDITUSERNAME, REDDITPWD)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("geddit login succesful")
+		
 }
 
 func Start() {
@@ -104,6 +131,7 @@ func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // nim command handler
 func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	nimRE, _ := regexp.Compile("^/nim .*")
 	// if message match with nim command
 	if nimRE.MatchString(m.Content) {
 		
@@ -127,6 +155,10 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.Bot {
 		return
 	}
+
+	publicTagRE, _ := regexp.Compile(`"([^"]+)"`)
+	guildTagRE, _ := regexp.Compile(":([^:])+:")
+	channelTagRE, _ := regexp.Compile(";([^;])+;")
 
 	if publicTagRE.MatchString(m.Content) {
 		name = strings.Replace(publicTagRE.FindString(m.Content), `"`, "", -1)
@@ -184,6 +216,11 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // add tag handler
 func addTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
+	if m.Author.ID == BotID {
+		return
+	}
+
+	addTagRE, _ := regexp.Compile("/addtag .*")
 	if addTagRE.MatchString(m.Content) {
 		args := strings.Split(m.Content, " ")
 
@@ -224,6 +261,11 @@ func deleteTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // list tag handler
 func listTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	if m.Author.ID == BotID {
+		return
+	}
+
+	listTagRE, _ := regexp.Compile("^/taglist")
 	if listTagRE.MatchString(m.Content) {
 		result :=  tag.List(m.ChannelID, m.GuildID)
 
@@ -243,14 +285,16 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	randomRE, _ := regexp.Compile("^/random")
 	if randomRE.MatchString(m.Content) {
 
-		status, title, url := reddit.Random()
+		status, title, url := reddit.Random(redditSession)
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
 			return
 		}
 
+		log.Println("fetched post from dankmemes")
 		embed := &discordgo.MessageEmbed{
 		    Author:      &discordgo.MessageEmbedAuthor{},
 		    Color:       0xFF5700, // reddit orange
@@ -291,7 +335,7 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return 
 	}
 
-
+	subredditRE, _ := regexp.Compile("^/r .*")
 	if subredditRE.MatchString(m.Content) {
 		args := strings.Split(m.Content, " ")
 		commentNum := 0
@@ -302,7 +346,7 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
-		status, title, url, desc, flair, comments := reddit.R(args[1], commentNum)
+		status, title, url, desc, flair, comments := reddit.R(redditSession, args[1], commentNum)
 
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
@@ -359,14 +403,16 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return 
 	}
 
+	askredditRE, _ := regexp.Compile("^/ask")
 	if askredditRE.MatchString(m.Content) {
 
-		status, title, desc, comments := reddit.Ask()
+		status, title, desc, comments := reddit.Ask(redditSession)
 
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
 			return
 		}
+
 
 		s.ChannelMessageSend(m.ChannelID, title)
 		s.ChannelMessageSend(m.ChannelID, desc)
