@@ -77,7 +77,9 @@ func init() {
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println("geddit login succesful")
+	log.Println("geddit login successful")
+	log.Println("geddit session: ")
+	log.Println(redditSession)
 		
 }
 
@@ -291,6 +293,8 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	randomRE, _ := regexp.Compile("^/random")
 	if randomRE.MatchString(m.Content) {
 
+		log.Println("reddit session:")
+		log.Println(redditSession)
 		status, title, url := reddit.Random(redditSession)
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
@@ -349,6 +353,9 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
+		
+		log.Println("reddit session:")
+		log.Println(redditSession)
 		status, title, url, desc, flair, comments := reddit.R(redditSession, args[1], commentNum)
 
 		if !status {
@@ -409,6 +416,8 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	askredditRE, _ := regexp.Compile("^/ask")
 	if askredditRE.MatchString(m.Content) {
 
+		log.Println("reddit session:")
+		log.Println(redditSession)
 		status, title, desc, comments := reddit.Ask(redditSession)
 
 		if !status {
