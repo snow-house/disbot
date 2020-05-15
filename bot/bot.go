@@ -293,7 +293,7 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	randomRE, _ := regexp.Compile("^/random")
 	if randomRE.MatchString(m.Content) {
 
-		log.Printf("reddit session: %v", redditSession)
+		log.Printf("[randomHandler] reddit session: %v", redditSession)
 		// log.Println(redditSession)
 		status, title, url := reddit.Random(redditSession)
 		if !status {
