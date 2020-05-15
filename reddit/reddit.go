@@ -5,7 +5,7 @@ import (
 	// "fmt"
 	"log"
 	"os"
-	// "strings"
+	"strings"
 	"math/rand"
 )
 
@@ -56,6 +56,13 @@ func init() {
 	}
 	log.Println("geddit login succesful")
 
+	scopes = strings.Split("identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,repost,save,submit,subscibe,vote,wikiedit,wikiread", ",")
+	code := session.AuthCodeURL("state", scopes)
+
+	log.Println(code)
+	
+
+
 	subOpts = geddit.ListingOptions {
 		Limit: 100,
 	}
@@ -65,14 +72,14 @@ func init() {
 // fetch a post from a subreddit
 func R(subreddit string, comment int) (status bool, title, url, desc, flair, comments string) {
 	
-	log.Printf("reddit session %v", session)
-	log.Printf("reddit session deref %v", *session)
+	// log.Printf("reddit session %v", session)
+	// log.Printf("reddit session deref %v", *session)
 
 	log.Println("fetching post from "+ subreddit)
 	posts, err := session.SubredditSubmissions(subreddit, geddit.HotSubmissions, subOpts)
 
 	if err != nil {
-		log.Println("failed when trying to fetch post from " + subreddit)
+		// log.Println("failed when trying to fetch post from " + subreddit)
 		log.Println(err)
 		return false, "something wrong", "url", "desc", "flair", "comments"
 	}
@@ -86,8 +93,8 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 	idx := rand.Intn(idxRange)
 
 
-	log.Println(posts[idx].Title)
-	log.Println(posts[idx].URL)
+	// log.Println(posts[idx].Title)
+	// log.Println(posts[idx].URL)
 
 
 
@@ -97,8 +104,8 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 // fetch a post and comments from r/askreddit
 func Ask() (status bool, title, desc, comments string) {
 
-	log.Printf("reddit session %v", session)
-	log.Printf("reddit session deref %v", *session)
+	// log.Printf("reddit session %v", session)
+	// log.Printf("reddit session deref %v", *session)
 
 	log.Println("fetching post from askreddit")
 	posts, err := session.SubredditSubmissions("askreddit", geddit.HotSubmissions, subOpts)
@@ -116,8 +123,8 @@ func Ask() (status bool, title, desc, comments string) {
 
 	idx := rand.Intn(idxRange)
 
-	log.Println(posts[idx].Title)
-	log.Println(posts[idx].Selftext)
+	// log.Println(posts[idx].Title)
+	// log.Println(posts[idx].Selftext)
 
 	return true, posts[idx].Title, posts[idx].Selftext, "comments"
 }
@@ -125,8 +132,8 @@ func Ask() (status bool, title, desc, comments string) {
 // fetch a meme from r/dankmemes
 func Random() (status bool, title, url string) {
 
-	log.Printf("reddit session %v", session)
-	log.Printf("reddit session deref %v", *session)
+	// log.Printf("reddit session %v", session)
+	// log.Printf("reddit session deref %v", *session)
 	
 
 	log.Println("fetching post from dankmemes")
@@ -145,8 +152,8 @@ func Random() (status bool, title, url string) {
 
 	idx := rand.Intn(idxRange)
 	
-	log.Println(posts[idx].Title)
-	log.Println(posts[idx].URL)
+	// log.Println(posts[idx].Title)
+	// log.Println(posts[idx].URL)
 
 	return true, posts[idx].Title, posts[idx].URL
 }
