@@ -55,6 +55,9 @@ func init() {
 	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
 	REDDITPWD = os.Getenv("REDDITPWD")
 
+	log.Println(REDDITCLIENTID)
+	log.Println(REDDITCLIENTSECRET)
+
 
 	// init geddit session 
 	redditSession, err := geddit.NewOAuthSession(
@@ -111,10 +114,10 @@ func Start() {
 	// open the websocket and begin listening
 	err = bot.Open()
 	if err != nil {
-		fmt.Println("Error opening Discord session: ", err)
+		log.Println("Error opening Discord session: ", err)
 	}
 
-	fmt.Println("Bot is running")
+	log.Println("Bot is running")
 }
 
 // simple pings
