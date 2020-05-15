@@ -113,7 +113,7 @@ func helpHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // nim command handler
 func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.Bot == BotID {
+	if m.Author.ID == BotID {
 		return
 	}
 
