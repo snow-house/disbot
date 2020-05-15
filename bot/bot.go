@@ -2,7 +2,7 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/jzelinskie/geddit"
+	// "github.com/jzelinskie/geddit"
 
 	"fmt"
 	"log"
@@ -26,16 +26,16 @@ var (
 	infoTagRE *regexp.Regexp
 
 
-	redditSession *geddit.OAuthSession
-	// subOpts geddit.ListingOptions
+	// redditSession *geddit.OAuthSession
+	// // subOpts geddit.ListingOptions
 
-	REDDITCLIENTID string
-	REDDITCLIENTSECRET string
-	REDDITREFRESHTOKEN string
-	REDDITACCESSTOKEN string
+	// REDDITCLIENTID string
+	// REDDITCLIENTSECRET string
+	// REDDITREFRESHTOKEN string
+	// REDDITACCESSTOKEN string
 
-	REDDITUSERNAME string
-	REDDITPWD string
+	// REDDITUSERNAME string
+	// REDDITPWD string
 
 	
 )
@@ -47,39 +47,39 @@ func init() {
 	infoTagRE, _ = regexp.Compile("^/taginfo .*")
 
 	// read env
-	REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
-	REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
-	REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
-	REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
+	// REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
+	// REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
+	// REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
+	// REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
 
-	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
-	REDDITPWD = os.Getenv("REDDITPWD")
+	// REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
+	// REDDITPWD = os.Getenv("REDDITPWD")
 
-	log.Println("REDDITCLIENTID: " + REDDITCLIENTID)
-	log.Println("REDDITCLIENTSECRET: " + REDDITCLIENTSECRET)
+	// log.Println("REDDITCLIENTID: " + REDDITCLIENTID)
+	// log.Println("REDDITCLIENTSECRET: " + REDDITCLIENTSECRET)
 
 
-	var err error
-	// init geddit session 
-	redditSession, err = geddit.NewOAuthSession(
-		REDDITCLIENTID,
-		REDDITCLIENTSECRET,
-		"gedditAgent v2",
-		"redirect url",
-	)
+	// var err error
+	// // init geddit session 
+	// redditSession, err = geddit.NewOAuthSession(
+	// 	REDDITCLIENTID,
+	// 	REDDITCLIENTSECRET,
+	// 	"gedditAgent v2",
+	// 	"redirect url",
+	// )
 
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit oauth session opened")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit oauth session opened")
 
-	// login using personal reddit account
-	err = redditSession.LoginAuth(REDDITUSERNAME, REDDITPWD)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit login successful")
-	log.Printf("geddit session: %v", redditSession)
+	// // login using personal reddit account
+	// err = redditSession.LoginAuth(REDDITUSERNAME, REDDITPWD)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit login successful")
+	// log.Printf("geddit session: %v", redditSession)
 	// log.Println(redditSession)
 		
 }
@@ -294,9 +294,9 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	randomRE, _ := regexp.Compile("^/random")
 	if randomRE.MatchString(m.Content) {
 
-		log.Printf("[randomHandler] reddit session: %v", redditSession)
+		// log.Printf("[randomHandler] reddit session: %v", redditSession)
 		// log.Println(redditSession)
-		status, title, url := reddit.Random(redditSession)
+		status, title, url := reddit.Random()
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
 			return
@@ -355,9 +355,9 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		
-		log.Printf("reddit session: %v", redditSession)
+		// log.Printf("reddit session: %v", redditSession)
 		// log.Println(redditSession)
-		status, title, url, desc, flair, comments := reddit.R(redditSession, args[1], commentNum)
+		status, title, url, desc, flair, comments := reddit.R(args[1], commentNum)
 
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
@@ -417,9 +417,9 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	askredditRE, _ := regexp.Compile("^/ask")
 	if askredditRE.MatchString(m.Content) {
 
-		log.Printf("reddit session: %v", redditSession)
+		// log.Printf("reddit session: %v", redditSession)
 		// log.Println(redditSession)
-		status, title, desc, comments := reddit.Ask(redditSession)
+		status, title, desc, comments := reddit.Ask()
 
 		if !status {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
