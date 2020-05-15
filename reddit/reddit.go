@@ -56,7 +56,8 @@ func init() {
 	}
 	log.Println("geddit login succesful")
 
-	scopes := strings.Split("identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,repost,save,submit,subscibe,vote,wikiedit,wikiread", ",")
+	// scopes := strings.Split("identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,repost,save,submit,subscibe,vote,wikiedit,wikiread", ",")
+	scopes := strings.Split("read", ",")
 	code := session.AuthCodeURL("state", scopes)
 
 	log.Println(code)

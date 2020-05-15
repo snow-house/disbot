@@ -1,0 +1,8 @@
+/r [subreddit] [comment count]
+fetch a post and comments from subreddit
+
+comment count is set as 0 for default
+
+example: 
+	/r greentext 
+	/r wholesomememes 2

@@ -1,0 +1,9 @@
+/nim [query]
+return list of name, id, and major
+
+query can be name, student id, faculty, major or year
+example:
+	/nim muhammad
+	/nim algah if
+	/nim fattah stei
+	/nim illahi if 17

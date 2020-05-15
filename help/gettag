@@ -1,0 +1,9 @@
+get a picture associated with a tag
+scope of a tag can be public, guild, and channel
+
+"[public tag]"
+:[guild tag]:
+;[channel tag];
+
+example:
+	"y"

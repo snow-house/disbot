@@ -1,0 +1,9 @@
+/addtag [tag name] [tag url] [tag scope]
+add tag to database
+
+tag scope is set to guild as default, use flag -p for public, and -c to set scope to channel
+
+example:
+	/addtag amatir https://imgur.com/amatir 
+	/addtag veteran https://imgur.com/veteran -p
+	/addtag sib https://imgur.com/sib -c

@@ -2,7 +2,6 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
-	// "github.com/jzelinskie/geddit"
 
 	"fmt"
 	"log"
@@ -15,9 +14,11 @@ import (
 	"../nim"
 	"../tag"
 	"../reddit"
+	"../help"
 )
 
 var (
+
 	Token string
 	BotID string
 	bot *discordgo.Session
@@ -25,62 +26,12 @@ var (
 	deleteTagRE *regexp.Regexp
 	infoTagRE *regexp.Regexp
 
-
-	// redditSession *geddit.OAuthSession
-	// // subOpts geddit.ListingOptions
-
-	// REDDITCLIENTID string
-	// REDDITCLIENTSECRET string
-	// REDDITREFRESHTOKEN string
-	// REDDITACCESSTOKEN string
-
-	// REDDITUSERNAME string
-	// REDDITPWD string
-
-	
 )
 
 func init() {
-	
-	
+		
 	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
 	infoTagRE, _ = regexp.Compile("^/taginfo .*")
-
-	// read env
-	// REDDITCLIENTID = os.Getenv("REDDITCLIENTID")
-	// REDDITCLIENTSECRET = os.Getenv("REDDITCLIENTSECRET")
-	// REDDITACCESSTOKEN = os.Getenv("REDDITACCESSTOKEN")
-	// REDDITREFRESHTOKEN = os.Getenv("REDDITREFRESHTOKEN")
-
-	// REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
-	// REDDITPWD = os.Getenv("REDDITPWD")
-
-	// log.Println("REDDITCLIENTID: " + REDDITCLIENTID)
-	// log.Println("REDDITCLIENTSECRET: " + REDDITCLIENTSECRET)
-
-
-	// var err error
-	// // init geddit session 
-	// redditSession, err = geddit.NewOAuthSession(
-	// 	REDDITCLIENTID,
-	// 	REDDITCLIENTSECRET,
-	// 	"gedditAgent v2",
-	// 	"redirect url",
-	// )
-
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// log.Println("geddit oauth session opened")
-
-	// // login using personal reddit account
-	// err = redditSession.LoginAuth(REDDITUSERNAME, REDDITPWD)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// log.Println("geddit login successful")
-	// log.Printf("geddit session: %v", redditSession)
-	// log.Println(redditSession)
 		
 }
 
@@ -96,6 +47,9 @@ func Start() {
 
 	// add handlers
 	bot.AddHandler(fuckHandler)
+
+	// help
+	bot.AddHandler(helpHandler)
 
 	// nim
 	bot.AddHandler(nimHandler)
@@ -134,8 +88,34 @@ func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func helpHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	
+	if m.Author.ID == BotID {
+		return
+	}
+
+	helpRE, _ := regexp.Compile("^/help(\\s.+)?")
+	if helpRE.MatchString(m.Content) {
+
+		command := "default"
+
+		args := strings.Split(m.Content, " ")
+		if len(args) > 1 {
+			command = args[1]
+		}
+
+		reply := help.Show(command)
+
+		s.ChannelMessageSend(m.ChannelID, reply)
+	}
+}
+
 // nim command handler
 func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if m.Author.Bot == BotID {
+		return
+	}
 
 	nimRE, _ := regexp.Compile("^/nim .*")
 	// if message match with nim command
@@ -434,4 +414,6 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 }
+
+
 
