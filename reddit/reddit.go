@@ -64,7 +64,8 @@ func init() {
 // fetch a post from a subreddit
 func R(session *geddit.OAuthSession, subreddit string, comment int) (status bool, title, url, desc, flair, comments string) {
 	
-	log.Println(session)
+	log.Printf("reddit session %v", session)
+	log.Printf("reddit session deref %v", *session)
 
 	log.Println("fetching post from "+ subreddit)
 	posts, err := session.SubredditSubmissions(subreddit, geddit.HotSubmissions, subOpts)
@@ -95,7 +96,8 @@ func R(session *geddit.OAuthSession, subreddit string, comment int) (status bool
 // fetch a post and comments from r/askreddit
 func Ask(session *geddit.OAuthSession) (status bool, title, desc, comments string) {
 
-	log.Println(session)
+	log.Printf("reddit session %v", session)
+	log.Printf("reddit session deref %v", *session)
 
 	log.Println("fetching post from askreddit")
 	posts, err := session.SubredditSubmissions("askreddit", geddit.HotSubmissions, subOpts)
@@ -122,7 +124,9 @@ func Ask(session *geddit.OAuthSession) (status bool, title, desc, comments strin
 // fetch a meme from r/dankmemes
 func Random(session *geddit.OAuthSession) (status bool, title, url string) {
 
-	log.Println(session)
+	log.Printf("reddit session %v", session)
+	log.Printf("reddit session deref %v", *session)
+	
 
 	log.Println("fetching post from dankmemes")
 	posts, err := session.SubredditSubmissions("dankmemes", geddit.HotSubmissions, subOpts)
