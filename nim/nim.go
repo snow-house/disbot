@@ -26,7 +26,7 @@ type NimAPIResponse struct {
 	Data []Student `json:"data"`
 }
 
-func Find(query string) (string){
+func Find(query string) (name, tpb, s1, major string) {
 
 	baseurl := "http://35.240.223.196:6969/get/nim/"
 
@@ -41,7 +41,7 @@ func Find(query string) (string){
 	defer res.Body.Close()
 
 	if (res.StatusCode == 204) {
-		return "nothing found :("
+		return "nothing found :(", "tpb", "s1", "major"
 	}
 
 
@@ -52,23 +52,24 @@ func Find(query string) (string){
 	
 	nim, err := getNims([]byte(body))
 
-	reply := ""
-
 	max := 15
 	if nim.Count < max {
 		max = nim.Count
 	}
 
+	n := ""
+	t := ""
+	s := ""
+	m := ""
+
 	for i := 0; i < max; i++ {
-		reply = fmt.Sprintf("%s\n%s %s %s %s", 
-							reply,
-							nim.Data[i].Nama, 
-							nim.Data[i].Tpb,
-							nim.Data[i].S1,
-							nim.Data[i].Jurusan)
+		n = fmt.Sprintf("%s\n%s", n, nim.Data[i].Nama)
+		t = fmt.Sprintf("%s\n%s", t, nim.Data[i].Tpb)
+		s = fmt.Sprintf("%s\n%s", s, nim.Data[i].S1)
+		m = fmt.Sprintf("%s\n%s", m, nim.Data[i].Jurusan)
 	}
 
-	return reply
+	return n, t, s, m
 }
 
 
