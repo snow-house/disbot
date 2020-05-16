@@ -90,8 +90,6 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 		} else {
 			return false, "something wrong", "url", "desc", "flair", "comments"
 		}
-
-
 	}
 
 	// pick one random post from hot
@@ -106,7 +104,6 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].URL)
 	// comments := session.Submission
-
 
 	return true, posts[idx].Title , posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, "empty"
 }

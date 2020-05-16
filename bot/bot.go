@@ -353,13 +353,13 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		    Author:      &discordgo.MessageEmbedAuthor{},
 		    Color:       0xFF5700, // reddit orange
 		    Description: desc,
-		    Fields: []*discordgo.MessageEmbedField{
-		        &discordgo.MessageEmbedField{
-		            Name:   flair,
-		            // Value:  "",
-		            Inline: false,
-		        },
-		    },
+		    // Fields: []*discordgo.MessageEmbedField{
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   flair,
+		    //         // Value:  "",
+		    //         Inline: false,
+		    //     },
+		    // },
 		    Image: &discordgo.MessageEmbedImage{
 		        URL: url,
 		    },
@@ -368,6 +368,10 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+
+		if flair != "flair" {
+			s.ChannelMessageSend(m.ChannelID, flair)
+		}
 
 		if comments != "empty" {
 			s.ChannelMessageSend(m.ChannelID, comments)
