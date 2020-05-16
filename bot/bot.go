@@ -20,7 +20,7 @@ import (
 var (
 
 	Token string
-	BotID string
+	// BotID string
 	bot *discordgo.Session
 
 	deleteTagRE *regexp.Regexp
@@ -79,7 +79,7 @@ func Start() {
 
 // simple pings
 func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -90,7 +90,7 @@ func fuckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func helpHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -105,15 +105,24 @@ func helpHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		reply := help.Show(command)
+		// s.ChannelMessageSend(m.ChannelID, reply)
+		embed := &discordgo.MessageEmbed{
+		    Author:      &discordgo.MessageEmbedAuthor{},
+		    Color:       0x0088de, // blue cola
+		    Description: reply,
+		   
+		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		    Title:     "help "+ command,
+		}
 
-		s.ChannelMessageSend(m.ChannelID, reply)
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	}
 }
 
 // nim command handler
 func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -125,10 +134,40 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		query := strings.Replace(nimRE.FindString(m.Content), "/nim ", "", -1)
 		
 		// find nim or name
-		result := nim.Find(query)
+		name, tpb, s1, major := nim.Find(query)
 
-		// send reply
-		_, _ = s.ChannelMessageSend(m.ChannelID, result)
+		embed := &discordgo.MessageEmbed{
+		    Author:      &discordgo.MessageEmbedAuthor{},
+		    Color:       0x0088de, // blue cola
+		    // Description: desc,
+		    Fields: []*discordgo.MessageEmbedField{
+		        &discordgo.MessageEmbedField{
+		            Name:   "Nama",
+		            Value:  name,
+		            Inline: true,
+		        },
+		        &discordgo.MessageEmbedField{
+		            Name:   "TPB",
+		            Value:  tpb,
+		            Inline: true,
+		        },
+		        &discordgo.MessageEmbedField{
+		            Name:   "S1",
+		            Value:  s1,
+		            Inline: true,
+		        },
+		        &discordgo.MessageEmbedField{
+		            Name:   "Jurusan",
+		            Value:  major,
+		            Inline: true,
+		        },
+		    },
+
+		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		    Title:     "result for "+ query,
+		}
+
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	}	
 }
 
@@ -172,25 +211,10 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	embed := &discordgo.MessageEmbed{
 	    Author:      &discordgo.MessageEmbedAuthor{},
 	    Color:       0x00ff00, // Green
-	    // Description: "This is a discordgo embed",
-	    // Fields: []*discordgo.MessageEmbedField{
-	    //     &discordgo.MessageEmbedField{
-	    //         Name:   "I am a field",
-	    //         Value:  "I am a value",
-	    //         Inline: true,
-	    //     },
-	    //     &discordgo.MessageEmbedField{
-	    //         Name:   "I am a second field",
-	    //         Value:  "I am a value",
-	    //         Inline: true,
-	    //     },
-	    // },
+	    
 	    Image: &discordgo.MessageEmbedImage{
 	        URL: url,
 	    },
-	    // Thumbnail: &discordgo.MessageEmbedThumbnail{
-	    //     URL: url,
-	    // },
 	    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
 	    Title:     name,
 	}
@@ -202,7 +226,7 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // add tag handler
 func addTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -247,7 +271,7 @@ func deleteTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // list tag handler
 func listTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -267,7 +291,7 @@ func infoTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // random meme handler
 func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return
 	}
 
@@ -286,25 +310,9 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		embed := &discordgo.MessageEmbed{
 		    Author:      &discordgo.MessageEmbedAuthor{},
 		    Color:       0xFF5700, // reddit orange
-		    // Description: desc,
-		    // Fields: []*discordgo.MessageEmbedField{
-		    //     &discordgo.MessageEmbedField{
-		    //         Name:   "I am a field",
-		    //         Value:  "I am a value",
-		    //         Inline: true,
-		    //     },
-		    //     &discordgo.MessageEmbedField{
-		    //         Name:   "I am a second field",
-		    //         Value:  "I am a value",
-		    //         Inline: true,t
-		    //     },
-		    // },
 		    Image: &discordgo.MessageEmbedImage{
 		        URL: url,
 		    },
-		    // Thumbnail: &discordgo.MessageEmbedThumbnail{
-		    //     URL: url,
-		    // },
 		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
 		    Title:     title,
 		}
@@ -319,7 +327,7 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // /r handler
 func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return 
 	}
 
@@ -334,9 +342,6 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
-		
-		// log.Printf("reddit session: %v", redditSession)
-		// log.Println(redditSession)
 		status, title, url, desc, flair, comments := reddit.R(args[1], commentNum)
 
 		if !status {
@@ -348,37 +353,21 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		    Author:      &discordgo.MessageEmbedAuthor{},
 		    Color:       0xFF5700, // reddit orange
 		    Description: desc,
-		    // Fields: []*discordgo.MessageEmbedField{
-		    //     &discordgo.MessageEmbedField{
-		    //         Name:   "I am a field",
-		    //         Value:  "I am a value",
-		    //         Inline: true,
-		    //     },
-		    //     &discordgo.MessageEmbedField{
-		    //         Name:   "I am a second field",
-		    //         Value:  "I am a value",
-		    //         Inline: true,t
-		    //     },
-		    // },
+		    Fields: []*discordgo.MessageEmbedField{
+		        &discordgo.MessageEmbedField{
+		            Name:   flair,
+		            // Value:  "",
+		            Inline: false,
+		        },
+		    },
 		    Image: &discordgo.MessageEmbedImage{
 		        URL: url,
 		    },
-		    // Thumbnail: &discordgo.MessageEmbedThumbnail{
-		    //     URL: url,
-		    // },
 		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
 		    Title:     title,
 		}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
-
-		if flair != "flair" {
-			s.ChannelMessageSend(m.ChannelID, flair)
-		}
-
-		if desc != "desc" {
-			s.ChannelMessageSend(m.ChannelID, desc)
-		}
 
 		if comments != "empty" {
 			s.ChannelMessageSend(m.ChannelID, comments)
@@ -390,15 +379,13 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 // /ask handler
 func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	if m.Author.ID == BotID {
+	if m.Author.Bot {
 		return 
 	}
 
 	askredditRE, _ := regexp.Compile("^/ask")
 	if askredditRE.MatchString(m.Content) {
 
-		// log.Printf("reddit session: %v", redditSession)
-		// log.Println(redditSession)
 		status, title, desc, comments := reddit.Ask()
 
 		if !status {
