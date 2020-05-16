@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"regexp"
 	"math/rand"
 )
 
@@ -20,6 +21,8 @@ var (
 
 	REDDITUSERNAME string
 	REDDITPWD string
+
+	refreshRE *regexp.Regexp
 
 )
 
@@ -68,6 +71,8 @@ func init() {
 		Limit: 100,
 	}
 
+	refreshRE, err = regexp.Compile("(?i)refresh")
+
 }
 
 // fetch a post from a subreddit
@@ -82,7 +87,14 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 	if err != nil {
 		// log.Println("failed when trying to fetch post from " + subreddit)
 		log.Println(err)
-		return false, "something wrong", "url", "desc", "flair", "comments"
+		if refreshRE.MatchString(err.Error()) {
+			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			return R(subreddit, comment)
+		} else {
+			return false, "something wrong", "url", "desc", "flair", "comments"
+		}
+
+
 	}
 
 	// pick one random post from hot
@@ -96,7 +108,7 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].URL)
-
+	// comments := session.Submission
 
 
 	return true, posts[idx].Title , posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, "empty"
@@ -113,7 +125,12 @@ func Ask() (status bool, title, desc, comments string) {
 	if err != nil {
 		log.Println("failed when trying to fetch post from askreddit")
 		log.Println(err)
-		return false, "something wrong :(", "desc", "comments"
+		if refreshRE.MatchString(err.Error()) {
+			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			return Ask()
+		} else {
+			return false, "something wrong :(", "desc", "comments"
+		}
 	}
 
 	// pick one random post from hot
@@ -123,6 +140,10 @@ func Ask() (status bool, title, desc, comments string) {
 	}
 
 	idx := rand.Intn(idxRange)
+
+	// s := geddit.NewSession("aryuuu")
+
+	// comments := s.SubmissionComments
 
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].Selftext)
@@ -142,7 +163,13 @@ func Random() (status bool, title, url string) {
 	if err != nil {
 		log.Println("failed when trying to fetch post from dankmemes")
 		log.Println(err)
-		return false, "something wrong :(", "url"
+
+		if refreshRE.MatchString(err.Error()) { // if re login already attempted
+			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			return Random()
+		} else {
+			return false, "something wrong :(", "url"
+		}
 	}
 
 	// pick one random post from hot
