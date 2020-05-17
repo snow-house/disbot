@@ -5,13 +5,15 @@ import (
 	// "fmt"
 	"log"
 	"os"
-	"strings"
+	"sort"
+	// "strings"
 	"regexp"
 	"math/rand"
 )
 
 var (
-	session *geddit.OAuthSession
+	// session *geddit.OAuthSession
+	session *geddit.Session
 	subOpts geddit.ListingOptions
 
 	REDDITCLIENTID string
@@ -37,41 +39,42 @@ func init() {
 	REDDITUSERNAME = os.Getenv("REDDITUSERNAME")
 	REDDITPWD = os.Getenv("REDDITPWD")
 
-
-	var err error
+	// var err error
 	// // init geddit session 
-	session, err = geddit.NewOAuthSession(
-		REDDITCLIENTID,
-		REDDITCLIENTSECRET,
-		"gedditAgent v2",
-		"redirect url",
-	)
+	// session, err = geddit.NewOAuthSession(
+	// 	REDDITCLIENTID,
+	// 	REDDITCLIENTSECRET,
+	// 	"gedditAgent v2",
+	// 	"redirect url",
+	// )
 
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit oauth session opened")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit oauth session opened")
 
-	// // login using personal reddit account
-	err = session.LoginAuth(REDDITUSERNAME, REDDITPWD)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("geddit login succesful")
+	// // // login using personal reddit account
+	// err = session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// log.Println("geddit login succesful")
 
 	// scopes := strings.Split("identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,repost,save,submit,subscibe,vote,wikiedit,wikiread", ",")
-	scopes := strings.Split("read", ",")
-	code := session.AuthCodeURL("state", scopes)
+	// scopes := strings.Split("read", ",")
+	// code := session.AuthCodeURL("state", scopes)
+	// log.Println(code)
 
-	log.Println(code)
-
-
+	// try using normal session instead of oauth, since we are not going
+	// to do anything beside fetching post like posting and upvoting
+	session = geddit.NewSession("aryuuu")
 
 	subOpts = geddit.ListingOptions {
 		Limit: 100,
 	}
 
-	refreshRE, err = regexp.Compile("(?i)refresh")
+	// var e error
+	refreshRE= regexp.MustCompile("(?i)refresh")
 
 }
 
@@ -85,7 +88,8 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 		// log.Println("failed when trying to fetch post from " + subreddit)
 		log.Println(err)
 		if refreshRE.MatchString(err.Error()) {
-			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			// session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			session = geddit.NewSession("aryuuu")
 			return R(subreddit, comment)
 		} else {
 			return false, "something wrong", "url", "desc", "flair", "comments"
@@ -103,9 +107,30 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].URL)
-	// comments := session.Submission
+	var coms []*geddit.Comment
+	c := ""
+	if (comment > 0) {
+		coms, err = session.Comments(posts[idx])
 
-	return true, posts[idx].Title , posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, "empty"
+		if err == nil {
+
+			sort.SliceStable(coms, func(i, j int) bool {
+				return coms[i].Score > coms[j].Score
+			})
+
+			commentRange := comment
+			if len(coms) < commentRange {
+				commentRange = len(comments)
+			}
+
+			for i:= 0; i < commentRange; i++ {
+				c += ">> " + coms[i].Body
+			}
+
+		}
+	}
+
+	return true, posts[idx].Title , posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, c
 }
 
 // fetch a post and comments from r/askreddit
@@ -117,7 +142,8 @@ func Ask() (status bool, title, desc, comments string) {
 		log.Println("failed when trying to fetch post from askreddit")
 		log.Println(err)
 		if refreshRE.MatchString(err.Error()) {
-			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			// session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			session = geddit.NewSession("aryuuu")
 			return Ask()
 		} else {
 			return false, "something wrong :(", "desc", "comments"
@@ -132,14 +158,27 @@ func Ask() (status bool, title, desc, comments string) {
 
 	idx := rand.Intn(idxRange)
 
-	// s := geddit.NewSession("aryuuu")
+	s := geddit.NewSession("aryuuu")
 
-	// comments := s.SubmissionComments
+	coms, err := s.Comments(posts[idx])
+	c := ""
+	if err == nil {
+		
+		// sort comments descending
+		sort.SliceStable(coms, func(i, j int) bool {
+			return coms[i].Score > coms[j].Score
+		})
+
+		for i:= 0; i < 3; i++ {
+			c += ">> " + coms[i].Body
+		}
+	}
+
 
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].Selftext)
 
-	return true, posts[idx].Title, posts[idx].Selftext, "comments"
+	return true, posts[idx].Title, posts[idx].Selftext, c
 }
 
 // fetch a meme from r/dankmemes
@@ -152,7 +191,8 @@ func Random() (status bool, title, url string) {
 		log.Println(err)
 
 		if refreshRE.MatchString(err.Error()) { // if re login already attempted
-			session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			// session.LoginAuth(REDDITUSERNAME, REDDITPWD)
+			session = geddit.NewSession("aryuuu")
 			return Random()
 		} else {
 			return false, "something wrong :(", "url"

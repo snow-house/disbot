@@ -7,14 +7,17 @@ import (
 	"log"
 	"regexp"
 	"os"
+	// "io"
+	// "io/ioutil"
 	"time"
 	"strings"
 	"strconv"
 
+	"../help"
 	"../nim"
 	"../tag"
 	"../reddit"
-	"../help"
+	// "../shout"
 )
 
 var (
@@ -65,6 +68,9 @@ func Start() {
 	bot.AddHandler(rHandler)
 	bot.AddHandler(askHandler)
 	bot.AddHandler(randomHandler)
+
+	// shout
+	bot.AddHandler(vvHandler)
 
 
 
@@ -396,14 +402,78 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "something wrong :(")
 			return
 		}
+		embed := &discordgo.MessageEmbed{
+		    Author:      &discordgo.MessageEmbedAuthor{},
+		    Color:       0xFF5700, // reddit orange
+		    Description: desc,
+		    // Fields: []*discordgo.MessageEmbedField{
+		    //     &discordgo.MessageEmbedField{
+		    //         Name:   flair,
+		    //         // Value:  "",
+		    //         Inline: false,
+		    //     },
+		    // },
+		    // Image: &discordgo.MessageEmbedImage{
+		    //     URL: url,
+		    // },
+		    Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		    Title:     title,
+		}
 
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 
-		s.ChannelMessageSend(m.ChannelID, title)
-		s.ChannelMessageSend(m.ChannelID, desc)
+		// s.ChannelMessageSend(m.ChannelID, title)
+		// s.ChannelMessageSend(m.ChannelID, desc)
 		s.ChannelMessageSend(m.ChannelID, comments)
 		return
 	}
 
+}
+
+// vv shout handler
+func vvHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	if m.Author.Bot {
+		return
+	}
+
+	vvRE, _ := regexp.Compile("\\{([^{}])+\\}")
+	if vvRE.MatchString(m.Content) {
+		log.Println(m.Content)
+
+		
+
+		// embed := &discordgo.MessageEmbed{
+		//     Author:      &discordgo.MessageEmbedAuthor{},
+		//     Color:       0xFFA5A5, // light salmon pink
+		//     Image: &discordgo.MessageEmbedImage{
+		//         URL: url,
+		//     },
+		//     Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		//     Title:     "vv says",
+		// }
+
+		// s.ChannelMessageSendEmbed(m.ChannelID, embed)
+
+		// dat, err := ioutil.ReadFile("shout/vvsays.png")
+		// if err != nil {
+		// 	log.Println(err)
+		// }
+
+		// complex := &discordgo.MessageSend{
+		// 	Tts: false,
+		// 	Files: []&discordgo.File{
+		// 		&discordgo.File{
+		// 			Name: "vvsays",
+		// 			ContentType: "image/png",
+		// 			Reader: io.Reader
+		// 		}
+		// 	}
+		// }
+
+
+		// s.ChannelMessageSendComplex(m.ChannelID, complex)
+	}
 }
 
 
