@@ -124,7 +124,7 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 			}
 
 			for i:= 0; i < commentRange; i++ {
-				c += ">> " + coms[i].Body
+				c += ">> " + coms[i].Body + "\n"
 			}
 
 		}
@@ -170,7 +170,7 @@ func Ask() (status bool, title, desc, comments string) {
 		})
 
 		for i:= 0; i < 3; i++ {
-			c += ">> " + coms[i].Body
+			c += ">> " + coms[i].Body +"\n"
 		}
 	}
 
