@@ -187,7 +187,7 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	publicTagRE, _ := regexp.Compile(`\\|([^|]+)\\|`)
+	publicTagRE, _ := regexp.Compile("\\|([^|]+)\\|")
 	guildTagRE, _ := regexp.Compile(":([^:])+:")
 	channelTagRE, _ := regexp.Compile(";([^;])+;")
 
