@@ -192,7 +192,7 @@ func getTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	channelTagRE, _ := regexp.Compile(";([^;])+;")
 
 	if publicTagRE.MatchString(m.Content) {
-		name = strings.Replace(publicTagRE.FindString(m.Content), `"`, "", -1)
+		name = strings.Replace(publicTagRE.FindString(m.Content), `|`, "", -1)
 		scope = 2
 		
 	} else if guildTagRE.MatchString(m.Content) {
