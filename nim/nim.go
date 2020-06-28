@@ -28,7 +28,7 @@ type NimAPIResponse struct {
 
 func Find(query string) (name, tpb, s1, major string) {
 
-	baseurl := "http://35.240.223.196:6969/get/nim/"
+	baseurl := "https://api.nim.aryuuu.ninja/get/nim/"
 
 	// send get request to nim finder
 	res, err := http.Get(baseurl+query)
