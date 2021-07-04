@@ -32,8 +32,8 @@ var (
 
 func init() {
 
-	deleteTagRE, _ = regexp.Compile("^/deletetag .*")
-	infoTagRE, _ = regexp.Compile("^/taginfo .*")
+	deleteTagRE, _ = regexp.Compile("^.deletetag .*")
+	infoTagRE, _ = regexp.Compile("^.taginfo .*")
 
 }
 
@@ -99,7 +99,7 @@ func helpHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	helpRE, _ := regexp.Compile("^/help(\\s.+)?")
+	helpRE, _ := regexp.Compile("^.help(\\s.+)?")
 	if helpRE.MatchString(m.Content) {
 
 		command := "default"
@@ -131,12 +131,12 @@ func nimHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	nimRE, _ := regexp.Compile("^/nim .*")
+	nimRE, _ := regexp.Compile("^.nim .*")
 	// if message match with nim command
 	if nimRE.MatchString(m.Content) {
 
 		// extract query
-		query := strings.Replace(nimRE.FindString(m.Content), "/nim ", "", -1)
+		query := strings.Replace(nimRE.FindString(m.Content), ".nim ", "", -1)
 
 		// find nim or name
 		name, tpb, s1, major := nim.Find(query)
@@ -234,7 +234,7 @@ func addTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	addTagRE, _ := regexp.Compile("/addtag .*")
+	addTagRE, _ := regexp.Compile("^.addtag .*")
 	if addTagRE.MatchString(m.Content) {
 		args := strings.Split(m.Content, " ")
 
@@ -279,7 +279,7 @@ func listTagHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	listTagRE, _ := regexp.Compile("^/taglist")
+	listTagRE, _ := regexp.Compile("^.taglist")
 	if listTagRE.MatchString(m.Content) {
 		result := tag.List(m.ChannelID, m.GuildID)
 
@@ -299,7 +299,7 @@ func randomHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	randomRE, _ := regexp.Compile("^/random")
+	randomRE, _ := regexp.Compile("^.random")
 	if randomRE.MatchString(m.Content) {
 
 		status, title, url := reddit.Random()
@@ -332,7 +332,7 @@ func rHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	subredditRE, _ := regexp.Compile("^/r .*")
+	subredditRE, _ := regexp.Compile("^.r .*")
 	if subredditRE.MatchString(m.Content) {
 		args := strings.Split(m.Content, " ")
 		commentNum := 0
