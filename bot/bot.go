@@ -388,7 +388,7 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	askredditRE, _ := regexp.Compile("^/ask")
+	askredditRE, _ := regexp.Compile("^.ask")
 	if askredditRE.MatchString(m.Content) {
 
 		status, title, desc, comments := reddit.Ask()
