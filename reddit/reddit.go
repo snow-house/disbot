@@ -6,9 +6,10 @@ import (
 	"log"
 	"os"
 	"sort"
+
 	// "strings"
-	"regexp"
 	"math/rand"
+	"regexp"
 )
 
 var (
@@ -16,16 +17,15 @@ var (
 	session *geddit.Session
 	subOpts geddit.ListingOptions
 
-	REDDITCLIENTID string
+	REDDITCLIENTID     string
 	REDDITCLIENTSECRET string
 	REDDITREFRESHTOKEN string
-	REDDITACCESSTOKEN string
+	REDDITACCESSTOKEN  string
 
 	REDDITUSERNAME string
-	REDDITPWD string
+	REDDITPWD      string
 
 	refreshRE *regexp.Regexp
-
 )
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 	REDDITPWD = os.Getenv("REDDITPWD")
 
 	// var err error
-	// // init geddit session 
+	// // init geddit session
 	// session, err = geddit.NewOAuthSession(
 	// 	REDDITCLIENTID,
 	// 	REDDITCLIENTSECRET,
@@ -69,19 +69,19 @@ func init() {
 	// to do anything beside fetching post like posting and upvoting
 	session = geddit.NewSession("aryuuu")
 
-	subOpts = geddit.ListingOptions {
+	subOpts = geddit.ListingOptions{
 		Limit: 100,
 	}
 
 	// var e error
-	refreshRE= regexp.MustCompile("(?i)refresh")
+	refreshRE = regexp.MustCompile("(?i)refresh")
 
 }
 
 // fetch a post from a subreddit
 func R(subreddit string, comment int) (status bool, title, url, desc, flair, comments string) {
-	
-	log.Println("fetching post from "+ subreddit)
+
+	log.Println("fetching post from " + subreddit)
 	posts, err := session.SubredditSubmissions(subreddit, geddit.HotSubmissions, subOpts)
 
 	if err != nil {
@@ -104,12 +104,11 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 
 	idx := rand.Intn(idxRange)
 
-
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].URL)
 	var coms []*geddit.Comment
 	c := ""
-	if (comment > 0) {
+	if comment > 0 {
 		coms, err = session.Comments(posts[idx])
 
 		if err == nil {
@@ -123,14 +122,14 @@ func R(subreddit string, comment int) (status bool, title, url, desc, flair, com
 				commentRange = len(comments)
 			}
 
-			for i:= 0; i < commentRange; i++ {
+			for i := 0; i < commentRange; i++ {
 				c += ">> " + coms[i].Body + "\n"
 			}
 
 		}
 	}
 
-	return true, posts[idx].Title , posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, c
+	return true, posts[idx].Title, posts[idx].URL, posts[idx].Selftext, posts[idx].LinkFlairText, c
 }
 
 // fetch a post and comments from r/askreddit
@@ -163,17 +162,16 @@ func Ask() (status bool, title, desc, comments string) {
 	coms, err := s.Comments(posts[idx])
 	c := ""
 	if err == nil {
-		
+
 		// sort comments descending
 		sort.SliceStable(coms, func(i, j int) bool {
 			return coms[i].Score > coms[j].Score
 		})
 
-		for i:= 0; i < 3; i++ {
-			c += ">> " + coms[i].Body +"\n"
+		for i := 0; i < 3; i++ {
+			c += ">> " + coms[i].Body + "\n"
 		}
 	}
-
 
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].Selftext)
@@ -206,10 +204,9 @@ func Random() (status bool, title, url string) {
 	}
 
 	idx := rand.Intn(idxRange)
-	
+
 	// log.Println(posts[idx].Title)
 	// log.Println(posts[idx].URL)
 
 	return true, posts[idx].Title, posts[idx].URL
 }
-

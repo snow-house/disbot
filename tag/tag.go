@@ -1,19 +1,20 @@
 package tag
 
 import (
-	"os"
-	"log"
-	"fmt"
-	"strings"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	DBNAME string
+	DBNAME     string
 	DBUSERNAME string
-	DBPWD string
-	TABLENAME string
+	DBPWD      string
+	TABLENAME  string
 )
 
 func init() {
@@ -26,7 +27,6 @@ func init() {
 type Tag struct {
 	tag_name string
 }
-
 
 // get tag using tag name
 // return search status dan tag_url
@@ -50,7 +50,6 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 			tag_scope = ?;`, query)
 
 		err = db.QueryRow(query, name, scope).Scan(&url)
-		
 
 	} else if scope == 1 {
 		query = fmt.Sprintf(`
@@ -59,7 +58,7 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 			tag_scope = ?;`, query)
 
 		err = db.QueryRow(query, name, guild, scope).Scan(&url)
-		
+
 	} else {
 		query = fmt.Sprintf(`
 			%s
@@ -67,10 +66,10 @@ func Get(name, channel, guild string, scope int) (bool, string) {
 			tag_scope = ?;`, query)
 
 		err = db.QueryRow(query, name, channel, scope).Scan(&url)
-		
+
 	}
 
-	if err!= nil {
+	if err != nil {
 		log.Println(err)
 		return false, "nothing found"
 	}
@@ -118,7 +117,7 @@ func List(channel, guild string) string {
 		(tag_scope = 0 and tag_channel = ?) OR 
 		(tag_scope = 1 AND tag_guild = ?) OR
 		tag_scope = 2;`,
-		 TABLENAME)
+		TABLENAME)
 
 	// execute query
 	rows, err := db.Query(query, channel, guild)
@@ -129,13 +128,13 @@ func List(channel, guild string) string {
 
 	var (
 		channelTag []string
-		guildTag []string
-		publicTag []string
+		guildTag   []string
+		publicTag  []string
 	)
 	for rows.Next() {
 
 		var (
-			tag_name string
+			tag_name  string
 			tag_scope int
 		)
 		if err := rows.Scan(&tag_name, &tag_scope); err != nil {
@@ -151,9 +150,9 @@ func List(channel, guild string) string {
 
 	}
 	result := fmt.Sprintf("public: %s\nguild: %s\nchannel: %s",
-						strings.Join(publicTag, ","),
-						strings.Join(guildTag, ","),
-						strings.Join(channelTag, ","))
+		strings.Join(publicTag, ","),
+		strings.Join(guildTag, ","),
+		strings.Join(channelTag, ","))
 
 	return result
 }

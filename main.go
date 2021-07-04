@@ -1,9 +1,8 @@
 package main
 
 import (
-	"./bot"
+	"github.com/aryuuu/disbot/bot"
 )
-
 
 func main() {
 
@@ -12,7 +11,3 @@ func main() {
 
 	<-make(chan struct{})
 }
-
-
-
-

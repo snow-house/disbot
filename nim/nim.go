@@ -1,29 +1,30 @@
 package nim
 
 import (
-	"log"
 	"fmt"
+	"log"
+
 	// "strings"
 	"net/http"
 	// "reflect"
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 )
 
 type Student struct {
-	Nama string `json:"nama"`
+	Nama     string `json:"nama"`
 	Fakultas string `json:"fakultas"`
-	Tpb string `json:"tpb"`
-	S1 string `json:"s1"`
-	S2 string `json:"s2"`
-	S3 string `json:"s3"`
-	Jurusan string `json:"jurusan"`
+	Tpb      string `json:"tpb"`
+	S1       string `json:"s1"`
+	S2       string `json:"s2"`
+	S3       string `json:"s3"`
+	Jurusan  string `json:"jurusan"`
 }
 
 type NimAPIResponse struct {
-	Message string `json:"message"`
-	Count int `json:"count"`
-	Data []Student `json:"data"`
+	Message string    `json:"message"`
+	Count   int       `json:"count"`
+	Data    []Student `json:"data"`
 }
 
 func Find(query string) (name, tpb, s1, major string) {
@@ -31,25 +32,23 @@ func Find(query string) (name, tpb, s1, major string) {
 	baseurl := "https://api.nim.aryuuu.ninja/get/nim/"
 
 	// send get request to nim finder
-	res, err := http.Get(baseurl+query)
+	res, err := http.Get(baseurl + query)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-
 	defer res.Body.Close()
 
-	if (res.StatusCode == 204) {
+	if res.StatusCode == 204 {
 		return "nothing found :(", "tpb", "s1", "major"
 	}
-
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Println(err)
 	}
-	
+
 	nim, err := getNims([]byte(body))
 
 	max := 15
@@ -72,11 +71,10 @@ func Find(query string) (name, tpb, s1, major string) {
 	return n, t, s, m
 }
 
-
 func getNims(body []byte) (*NimAPIResponse, error) {
 	nim := new(NimAPIResponse)
 	// unmarshal response body
-	err := json.Unmarshal(body, &nim)	
+	err := json.Unmarshal(body, &nim)
 	if err != nil {
 		log.Println(err)
 	}
