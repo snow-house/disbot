@@ -35,7 +35,7 @@ func VVSays(quote string) (io.Reader, error) {
 	dc.SetColor(color.Black)
 	text := quote
 	dc.DrawStringWrapped(text, x, y, 0, 0, maxWidth, 1.5, gg.AlignCenter)
-	// dc.SavePNG("./vvsays.png")
+
 	imgafter := dc.Image()
 	buf := new(bytes.Buffer)
 	err = png.Encode(buf, imgafter)
