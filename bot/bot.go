@@ -17,6 +17,7 @@ import (
 	"github.com/aryuuu/disbot/help"
 	"github.com/aryuuu/disbot/nim"
 	"github.com/aryuuu/disbot/reddit"
+	"github.com/aryuuu/disbot/says"
 	"github.com/aryuuu/disbot/tag"
 	// "../shout"
 )
@@ -40,7 +41,7 @@ func init() {
 func Start() {
 	Token = os.Getenv("DISBOTTOKEN")
 
-	log.Println("disbottoken ", Token)
+	// log.Println("disbottoken ", Token)
 	// create new discord session using provided bot token
 	bot, err := discordgo.New("Bot " + Token)
 	if err != nil {
@@ -427,7 +428,6 @@ func askHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // vv shout handler
 func vvHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-
 	if m.Author.Bot {
 		return
 	}
@@ -435,35 +435,26 @@ func vvHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	vvRE, _ := regexp.Compile("\\{([^{}])+\\}")
 	if vvRE.MatchString(m.Content) {
 		log.Println(m.Content)
+		cleanContent := m.Content[1 : len(m.Content)-1]
 
-		// embed := &discordgo.MessageEmbed{
-		//     Author:      &discordgo.MessageEmbedAuthor{},
-		//     Color:       0xFFA5A5, // light salmon pink
-		//     Image: &discordgo.MessageEmbedImage{
-		//         URL: url,
-		//     },
-		//     Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-		//     Title:     "vv says",
-		// }
+		file, err := says.VVSays(cleanContent)
 
-		// s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "something went wrong :(")
+			log.Printf("error creating vvsays image: %v", err)
+			return
+		}
+		msg := &discordgo.MessageSend{
+			File: &discordgo.File{
+				Name:        "vvsays.png",
+				ContentType: "image/png",
+				Reader:      file, //so me type that implements os.Reader holding png file data. Ex: io.*bytes.Buffer
+			},
+		}
 
-		// dat, err := ioutil.ReadFile("shout/vvsays.png")
-		// if err != nil {
-		// 	log.Println(err)
-		// }
-
-		// complex := &discordgo.MessageSend{
-		// 	Tts: false,
-		// 	Files: []&discordgo.File{
-		// 		&discordgo.File{
-		// 			Name: "vvsays",
-		// 			ContentType: "image/png",
-		// 			Reader: io.Reader
-		// 		}
-		// 	}
-		// }
-
-		// s.ChannelMessageSendComplex(m.ChannelID, complex)
+		_, err = s.ChannelMessageSendComplex(m.ChannelID, msg)
+		if err != nil {
+			log.Printf("error sending vvsays: %v", err)
+		}
 	}
 }
