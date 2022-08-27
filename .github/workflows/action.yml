@@ -30,6 +30,7 @@ jobs:
           push: true
           tags: fattfatt/disbot:latest
   deploy:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Pull image and run docker via ssh
